@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Invoice - Mohamed Fathi Ahmed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        
+        /* Edit Mode Styles */
+        [contenteditable="true"] {
+            outline: none;
+            transition: all 0.2s;
+            border-radius: 4px;
+            cursor: text;
+        }
+        
+        /* Show dashed border only when hovering/focusing in edit mode */
+        [contenteditable="true"]:hover, [contenteditable="true"]:focus {
+            background-color: #e0f2fe; /* Light blue highlight */
+            box-shadow: 0 0 0 2px #3b82f6;
+            padding: 2px;
+            margin: -2px; /* Prevent layout shift */
+        }
+
+        /* Gradient for CIB styling */
+        .cib-gradient { background: linear-gradient(135deg, #00457c 0%, #005fa8 100%); }
+
+        /* Print Styles - CRITICAL */
+        @media print {
+            body { 
+                background-color: white !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
+            .no-print { display: none !important; }
+            .invoice-card { 
+                box-shadow: none !important; 
+                border: none !important; 
+                margin: 0 !important; 
+                width: 100% !important; 
+                max-width: 100% !important; 
+            }
+            /* Remove edit highlights when printing */
+            [contenteditable="true"] {
+                background-color: transparent !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="py-8 px-4 min-h-screen flex flex-col items-center">
+
+    <!-- Instructions Banner (No Print) -->
+    <div class="no-print w-full max-w-4xl mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 text-white p-2 rounded-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-blue-900">وضع التعديل مفعل (Edit Mode)</h3>
+                <p class="text-sm text-blue-700">اضغط على أي نص في الفاتورة لتغييره (السعر، التاريخ، الاسم). عند الانتهاء اضغط "Save PDF".</p>
+            </div>
+        </div>
+        <button onclick="printInvoice()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-bold shadow-md transition-all flex items-center gap-2 whitespace-nowrap">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            Save as PDF
+        </button>
+    </div>
+
+    <!-- INVOICE CONTAINER -->
+    <div id="invoice" class="bg-white w-full max-w-4xl shadow-2xl rounded-xl overflow-hidden invoice-card border border-slate-200">
+        
+        <!-- Top Bar -->
+        <div class="h-3 cib-gradient"></div>
+
+        <!-- Header -->
+        <div class="p-10 flex flex-col md:flex-row justify-between items-start border-b border-slate-100">
+            <div>
+                <h1 class="text-4xl font-extrabold text-slate-900 tracking-tighter mb-2">INVOICE</h1>
+                <div class="flex items-center gap-3 mt-2">
+                    <span contenteditable="true" class="bg-blue-50 text-blue-700 px-3 py-1 text-sm font-bold rounded-md">#INV-2026-001</span>
+                    <span contenteditable="true" class="text-slate-500 font-medium">Jan 22, 2026</span>
+                </div>
+            </div>
+            <div class="mt-6 md:mt-0 text-right">
+                <h2 contenteditable="true" class="text-2xl font-bold text-slate-800">Mohamed Fathi Ahmed</h2>
+                <p contenteditable="true" class="text-blue-600 font-semibold text-lg">Senior 3D Artist</p>
+                <div contenteditable="true" class="mt-1 text-slate-400 text-sm">Creative Solutions & 3D Visualization</div>
+            </div>
+        </div>
+
+        <!-- Addresses -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 p-10 bg-slate-50/30">
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">From</h3>
+                <div class="text-slate-700 leading-relaxed">
+                    <p contenteditable="true" class="font-bold text-slate-900 text-lg mb-1">Mohamed Fathi Ahmed</p>
+                    <div contenteditable="true">
+                        306 Street, New Maadi<br>
+                        Cairo, Egypt
+                    </div>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="text-slate-400">Tel:</span>
+                        <span contenteditable="true" class="font-semibold text-slate-800">+2 01278500433</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-left md:text-right">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Bill To</h3>
+                <div class="text-slate-700 leading-relaxed flex flex-col items-start md:items-end">
+                    <p contenteditable="true" class="font-bold text-slate-900 text-lg mb-1">Zad Group for Investment Co.</p>
+                    <div contenteditable="true" class="text-left md:text-right">
+                        Al Khobar, Eastern Province<br>
+                        Kingdom of Saudi Arabia
+                    </div>
+                    <div class="mt-2 text-slate-500">
+                        <span contenteditable="true">Finance@zadgroup.net</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="p-10">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-slate-100 text-left text-xs font-bold uppercase tracking-wider text-slate-400">
+                        <th class="pb-4 pl-2">Description</th>
+                        <th class="pb-4 text-center w-24">Qty</th>
+                        <th class="pb-4 text-right w-32">Price</th>
+                        <th class="pb-4 text-right w-32">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="text-slate-700">
+                    <tr class="border-b border-slate-50 group">
+                        <td class="py-6 pl-2">
+                            <p contenteditable="true" class="font-bold text-slate-800 text-lg">Professional 3D Design Services</p>
+                            <p contenteditable="true" class="text-sm text-slate-500 mt-1">Monthly Salary for Senior 3D Artist role - Jan 2026</p>
+                        </td>
+                        <td class="py-6 text-center">
+                            <span contenteditable="true" class="bg-slate-100 px-2 py-1 rounded">1</span>
+                        </td>
+                        <td class="py-6 text-right font-medium">
+                            <span contenteditable="true">$1,500.00</span>
+                        </td>
+                        <td class="py-6 text-right font-bold text-slate-900 text-lg">
+                            <span contenteditable="true">$1,500.00</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Totals -->
+            <div class="mt-8 flex justify-end">
+                <div class="w-64">
+                    <div class="flex justify-between py-2 text-slate-500 border-b border-slate-100">
+                        <span>Subtotal</span>
+                        <span contenteditable="true" class="font-medium text-slate-700">$1,500.00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-4 mt-2">
+                        <span class="font-bold text-slate-800 text-lg">Total Due</span>
+                        <span contenteditable="true" class="font-extrabold text-2xl text-blue-700">$1,500.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bank Details -->
+        <div class="bg-slate-50 p-8 md:p-10 border-t border-slate-100">
+            <div class="flex items-center gap-2 mb-6 text-blue-800">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                <h3 class="font-bold uppercase tracking-wide text-sm">Bank Transfer Details</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12 text-sm">
+                <div class="flex justify-between border-b border-slate-200 pb-2 border-dashed">
+                    <span class="text-slate-500">Beneficiary Name</span>
+                    <span contenteditable="true" class="font-bold text-slate-800">Mohamed Fathi Ahmed</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-2 border-dashed">
+                    <span class="text-slate-500">Bank</span>
+                    <span contenteditable="true" class="font-bold text-blue-700">Commercial International Bank (CIB)</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-2 border-dashed">
+                    <span class="text-slate-500">Account No.</span>
+                    <span contenteditable="true" class="font-mono font-bold text-slate-800">100072273286</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-2 border-dashed">
+                    <span class="text-slate-500">SWIFT</span>
+                    <span contenteditable="true" class="font-mono font-bold text-slate-800">CIBEGEXX</span>
+                </div>
+                <div class="md:col-span-2 flex justify-between border-b border-slate-200 pb-2 border-dashed">
+                    <span class="text-slate-500">IBAN</span>
+                    <span contenteditable="true" class="font-mono font-bold text-slate-800 tracking-wider">EG130010012700000100072273286</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 text-center text-slate-400 text-xs border-t border-slate-100">
+            <p contenteditable="true">Thank you for your business. Please ensure the transfer includes the invoice number.</p>
+        </div>
+    </div>
+
+    <!-- Spacer for scrolling -->
+    <div class="h-20 no-print"></div>
+
+    <script>
+        function printInvoice() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
