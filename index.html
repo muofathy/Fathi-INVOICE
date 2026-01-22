@@ -59,8 +59,7 @@
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important;
                 width: 210mm;
-                height: 297mm; 
-                overflow: hidden;
+                min-height: 297mm;
             }
 
             .no-print { display: none !important; }
@@ -72,8 +71,6 @@
                 margin: 0 !important;
                 box-shadow: none !important;
                 border: none !important;
-                transform: scale(0.96); 
-                transform-origin: top center;
             }
             
             .editable {
@@ -87,7 +84,7 @@
 </head>
 <body class="py-8 min-h-screen flex flex-col items-center gap-6">
 
-    <!-- Control Bar (No Print) - MOVED TO BOTTOM LEFT -->
+    <!-- Control Bar (No Print) -->
     <div class="no-print fixed bottom-6 left-6 z-50 bg-white/90 backdrop-blur-md shadow-lg border border-slate-200 rounded-full px-6 py-3 flex items-center gap-4 transition-all hover:shadow-xl">
         <button id="toggleEditBtn" onclick="toggleEditMode()" class="flex items-center gap-2 text-slate-600 hover:text-blue-700 font-semibold transition-colors">
             <i class="fa-solid fa-pen-to-square"></i>
@@ -101,18 +98,17 @@
     </div>
 
     <!-- MAIN INVOICE -->
-    <div id="invoice-container" class="bg-white w-full max-w-[210mm] shadow-2xl relative flex flex-col overflow-hidden">
+    <div id="invoice-container" class="bg-white w-full max-w-[210mm] min-h-[297mm] shadow-2xl relative flex flex-col">
         
         <!-- Decoration Top -->
         <div class="h-3 w-full cib-gradient"></div>
 
-        <div class="p-10 md:p-12 flex flex-col gap-8">
+        <div class="p-10 md:p-12 flex flex-col gap-8 flex-grow">
             
             <!-- Header Section -->
             <div class="flex justify-between items-center border-b border-slate-100 pb-6">
                 <div class="flex flex-col gap-2">
                     <h1 class="text-5xl font-extrabold text-slate-900 tracking-tight">INVOICE</h1>
-                    <!-- Restored Invoice Number -->
                     <div class="mt-1">
                         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Invoice No.</span>
                         <span class="editable text-xl font-bold text-cib-dark" id="inv-num">#INV-2026-001</span>
@@ -127,7 +123,7 @@
             <!-- Client & Provider Details -->
             <div class="grid grid-cols-2 gap-12">
                 <div>
-                    <!-- Updated From Header -->
+                    <!-- From -->
                     <h3 class="text-sm font-extrabold uppercase tracking-widest text-cib-dark mb-4 flex items-center gap-2 border-b border-slate-200 pb-2 w-max">
                         <span class="w-2 h-2 rounded-full bg-blue-500"></span> From
                     </h3>
@@ -139,7 +135,7 @@
                     </div>
                 </div>
                 <div class="text-right flex flex-col items-end">
-                    <!-- Updated Bill To Header -->
+                    <!-- Bill To -->
                     <h3 class="text-sm font-extrabold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2 border-b border-slate-200 pb-2 w-max justify-end">
                         Bill To <span class="w-2 h-2 rounded-full bg-slate-400"></span>
                     </h3>
@@ -147,13 +143,15 @@
                         <div class="editable font-bold text-slate-900 text-lg" id="to-name">Zad Group for Investment Co.</div>
                         <div class="editable" id="to-addr">Al Khobar, Eastern Province</div>
                         <div class="editable" id="to-country">Kingdom of Saudi Arabia</div>
-                        <div class="editable text-slate-500 mt-2" id="to-email">Finance@zadgroup.net</div>
+                        <!-- ADDED: Company Phone Number as requested -->
+                        <div class="editable text-slate-600 font-medium" id="to-phone">Tel: 966 13 865 5355</div>
+                        <div class="editable text-slate-500 mt-1" id="to-email">Finance@zadgroup.net</div>
                     </div>
                 </div>
             </div>
 
             <!-- Services Table -->
-            <div class="mt-2">
+            <div class="mt-4">
                 <table class="w-full">
                     <thead>
                         <tr class="border-b-2 border-slate-100 text-left">
@@ -197,38 +195,53 @@
                 </div>
             </div>
 
-            <!-- Bank Details Section (Resized for Harmony) -->
-            <div class="mt-8 bg-slate-50 rounded-xl p-8 border border-slate-200 relative overflow-hidden">
+            <!-- Bank Details Section -->
+            <div class="mt-auto mb-8 bg-slate-50 rounded-xl p-8 border border-slate-200 relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-2 h-full bg-cib-dark"></div>
                 <div class="flex items-center gap-3 mb-5 border-b border-slate-200 pb-3">
                     <i class="fa-solid fa-building-columns text-cib-dark text-lg"></i>
                     <h3 class="font-bold text-cib-dark uppercase tracking-wider text-sm">Banking Information</h3>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-10">
                     <div>
                         <span class="block text-xs uppercase font-bold text-slate-400 mb-1">Beneficiary Name</span>
                         <span class="editable font-bold text-slate-800 text-base" id="bank-name">Mohamed Fathi Ahmed</span>
                     </div>
+
+                    <!-- ADDED: Personal Address as requested -->
+                    <div>
+                        <span class="block text-xs uppercase font-bold text-slate-400 mb-1">Personal Address</span>
+                        <span class="editable font-bold text-slate-800 text-sm leading-tight" id="personal-addr">306 Street, New Maadi, Cairo, Egypt</span>
+                    </div>
+
                     <div>
                         <span class="block text-xs uppercase font-bold text-slate-400 mb-1">Bank Name</span>
                         <span class="editable font-bold text-blue-800 text-base" id="bank-inst">CIB (Commercial International Bank)</span>
                     </div>
-                    
-                    <div class="md:col-span-2">
-                        <span class="block text-xs uppercase font-bold text-slate-400 mb-1">Account Number</span>
-                        <span class="editable font-bold text-slate-900 text-xl tracking-wider" id="bank-acc">100072273286</span>
-                    </div>
 
-                    <div class="md:col-span-2">
-                        <span class="block text-xs uppercase font-bold text-slate-400 mb-1">IBAN</span>
-                        <span class="editable font-bold text-slate-900 text-lg md:text-xl tracking-wide break-all" id="bank-iban">EG130010012700000100072273286</span>
+                    <!-- ADDED: Bank Address as requested -->
+                    <div>
+                        <span class="block text-xs uppercase font-bold text-slate-400 mb-1">Bank Address</span>
+                        <!-- Used CIB Head Office as safe default -->
+                        <span class="editable font-bold text-slate-600 text-sm leading-tight" id="bank-addr">Nile Tower, 21/23 Charles de Gaulle St., Giza, Egypt</span>
+                    </div>
+                    
+                    <div>
+                        <span class="block text-xs uppercase font-bold text-slate-400 mb-1">Account Number</span>
+                        <span class="editable font-bold text-slate-900 text-lg tracking-wider" id="bank-acc">100072273286</span>
                     </div>
 
                     <div>
                         <span class="block text-xs uppercase font-bold text-slate-400 mb-1">SWIFT Code</span>
                         <span class="editable font-bold text-slate-700 text-base" id="bank-swift">CIBEGEXX</span>
                     </div>
+
+                    <div class="md:col-span-2">
+                        <span class="block text-xs uppercase font-bold text-slate-400 mb-1">IBAN</span>
+                        <span class="editable font-bold text-slate-900 text-lg tracking-wide break-all" id="bank-iban">EG130010012700000100072273286</span>
+                    </div>
+
                     <div>
                          <span class="block text-xs uppercase font-bold text-slate-400 mb-1">Currency</span>
                         <span class="editable font-bold text-slate-700 text-base">USD</span>
@@ -236,10 +249,6 @@
                 </div>
             </div>
 
-             <!-- Footer (Empty) -->
-             <div class="pt-8 mt-4">
-                <!-- Text removed as requested -->
-            </div>
         </div>
     </div>
 
